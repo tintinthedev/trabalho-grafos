@@ -29,14 +29,47 @@ export function read(filePath: string) {
 
     fileLines.shift();
 
-    let nodes: Node<unknown>[] = [];
-    let edges: Edge<unknown>[] = [];
+    const vertices = new Set<string>();
+    const edgesData: { from: string; to: string; weight: number }[] = [];
 
-    fileLines.forEach((line) => {
-      if (line === entryFile.LAST_LINE) return { nodes, edges };
+    for (const line of fileLines) {
+      const trimmed = line.trim();
+      if (trimmed === entryFile.LAST_LINE) break;
+      const parts = trimmed.split(/\s+/);
+      if (parts.length !== 3) {
+        throw new Error(`[ERRO] Formato de linha inválido: ${line}`);
+      }
+      const i = parts[0];
+      const j = parts[1];
+      const k = Number(parts[2]);
+      if (isNaN(k)) {
+        throw new Error(`[ERRO] Valor inválido na linha: ${line}`);
+      }
+      vertices.add(i);
+      vertices.add(j);
+      edgesData.push({ from: i, to: j, weight: k });
+    }
 
-      // TODO
-    });
+    if (vertices.size !== numVertices) {
+      throw new Error(
+        `[ERRO] Número de vértices não corresponde: esperado ${numVertices}, encontrado ${vertices.size}`
+      );
+    }
+
+    const nodes: Node<string>[] = [];
+    const nodeMap = new Map<string, Node<string>>();
+    for (const vertex of vertices) {
+      const node = { value: vertex };
+      nodes.push(node);
+      nodeMap.set(vertex, node);
+    }
+
+    const edges: Edge<string>[] = [];
+    for (const { from, to, weight } of edgesData) {
+      edges.push({ from: nodeMap.get(from)!, to: nodeMap.get(to)!, weight });
+    }
+
+    return { nodes, edges };
   }
 
   let fileData: string = "";
