@@ -6,7 +6,9 @@ import { Edge } from "../graph/Edge";
 export function read(filePath: string) {
   function readFile(filePath: string) {
     if (!filePath)
-      throw new Error("[ERRO] Usagem incorreta. Use: npm start <arquivo>");
+      throw new Error(
+        "[ERRO] Usagem incorreta. Use: npm start <arquivo> <formato> (formatos: adjacency-matrix, incidence-matrix, incidence-list)"
+      );
 
     const fileData = readFileSync(filePath, {
       encoding: "utf8",
